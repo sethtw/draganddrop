@@ -1,5 +1,6 @@
 export { default as CustomDragLayer } from './CustomDragLayer'
 export { default as DraggableCard } from './DraggableCard'
+export { default as GroupDraggableCard } from './GroupDraggableCard'
 export type { Item } from './DraggableCard'
 export { ItemTypes } from './DraggableCard'
 export { useSortableList } from './useSortableList' 

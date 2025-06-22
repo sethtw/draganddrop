@@ -5,11 +5,20 @@ export const useSortableList = (initialItems: Item[]) => {
   const [items, setItems] = useState<Item[]>(initialItems)
 
   const moveItem = (dragIndex: number, hoverIndex: number) => {
-    const dragItem = items[dragIndex]
-    const newItems = [...items]
-    newItems.splice(dragIndex, 1)
-    newItems.splice(hoverIndex, 0, dragItem)
-    setItems(newItems)
+    setItems(prevItems => {
+      const newItems = [...prevItems]
+      const draggedItem = newItems[dragIndex]
+      
+      if (!draggedItem) return prevItems
+      
+      // Remove the dragged item
+      newItems.splice(dragIndex, 1)
+      
+      // Insert at the new position
+      newItems.splice(hoverIndex, 0, draggedItem)
+      
+      return newItems
+    })
   }
 
   const addItem = (item: Item) => {

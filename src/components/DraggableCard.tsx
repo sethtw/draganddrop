@@ -9,26 +9,29 @@ export interface Item {
 }
 
 export const ItemTypes = {
-  CARD: 'card'
+  CARD: 'card',
+  GROUP: 'group'
 }
 
 interface DraggableCardProps {
   item: Item
   index: number
   moveCard: (dragIndex: number, hoverIndex: number) => void
+  groupId: string
 }
 
 // Draggable card component
 const DraggableCard = ({ 
   item, 
   index, 
-  moveCard 
+  moveCard,
+  groupId
 }: DraggableCardProps) => {
   const ref = useRef<HTMLDivElement>(null)
 
   const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.CARD,
-    item: { index, ...item },
+    item: { index, groupId, ...item },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -42,8 +45,15 @@ const DraggableCard = ({
       }
       const dragIndex = draggedItem.index
       const hoverIndex = index
+      const sourceGroupId = draggedItem.groupId
+      const targetGroupId = groupId
 
-      if (dragIndex === hoverIndex) {
+      if (dragIndex === hoverIndex && sourceGroupId === targetGroupId) {
+        return
+      }
+
+      // If moving between different groups, let the GroupDraggableCard handle it
+      if (sourceGroupId !== targetGroupId) {
         return
       }
 
@@ -62,6 +72,7 @@ const DraggableCard = ({
 
       moveCard(dragIndex, hoverIndex)
       draggedItem.index = hoverIndex
+      draggedItem.groupId = targetGroupId
     },
   })
 
