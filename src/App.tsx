@@ -1,4 +1,4 @@
-import { CustomDragLayer, GroupDraggableCard } from './components'
+import { CustomDragLayer, GroupDraggableCard, DraggableCard } from './components'
 import { useGroupManager, type Group } from './hooks/useGroupManager'
 import type { Item } from './components'
 import './App.css'
@@ -28,13 +28,43 @@ function App() {
   const {
     groups,
     groupItems,
-    ungroupedItems,
     createGroup,
-    createUngroupedItem,
+    createNewItem,
     moveItemInGroup,
     transferItem,
-    moveUngroupedItem,
   } = useGroupManager({ initialGroups, initialGroupItems })
+
+  // Render individual item or group based on item count
+  const renderGroupOrItem = (group: Group) => {
+    const items = groupItems[group.id] || []
+    
+    // If group has only one item, render the item directly
+    if (items.length === 1) {
+      const item = items[0]
+      return (
+        <DraggableCard
+          key={item.id}
+          item={item}
+          index={0}
+          moveCard={(dragIndex, hoverIndex) => moveItemInGroup(group.id, dragIndex, hoverIndex)}
+          groupId={group.id}
+        />
+      )
+    }
+    
+    // If group has multiple items or is empty, render the group
+    return (
+      <GroupDraggableCard
+        key={group.id}
+        groupId={group.id}
+        title={group.title}
+        items={items}
+        moveCard={(dragIndex, hoverIndex) => moveItemInGroup(group.id, dragIndex, hoverIndex)}
+        transferItem={transferItem}
+        backgroundColor={group.backgroundColor}
+      />
+    )
+  }
 
   return (
     <div style={{ 
@@ -82,7 +112,7 @@ function App() {
           + Create New Group
         </button>
         <button
-          onClick={createUngroupedItem}
+          onClick={createNewItem}
           style={{
             padding: '12px 24px',
             backgroundColor: '#007bff',
@@ -125,30 +155,8 @@ function App() {
           gap: '20px',
           flexWrap: 'wrap'
         }}>
-          {/* Ungrouped Items */}
-          {ungroupedItems.length > 0 && (
-            <GroupDraggableCard
-              groupId="ungrouped"
-              title="Ungrouped Items"
-              items={ungroupedItems}
-              moveCard={moveUngroupedItem}
-              transferItem={transferItem}
-              backgroundColor="#f8f9fa"
-            />
-          )}
-          
-          {/* Dynamic Groups */}
-          {groups.map(group => (
-            <GroupDraggableCard
-              key={group.id}
-              groupId={group.id}
-              title={group.title}
-              items={groupItems[group.id] || []}
-              moveCard={(dragIndex, hoverIndex) => moveItemInGroup(group.id, dragIndex, hoverIndex)}
-              transferItem={transferItem}
-              backgroundColor={group.backgroundColor}
-            />
-          ))}
+          {/* Render groups or individual items */}
+          {groups.map(group => renderGroupOrItem(group))}
         </div>
       </div>
       <CustomDragLayer />

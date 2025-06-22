@@ -15,7 +15,6 @@ interface UseGroupManagerProps {
 export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupManagerProps) => {
   const [groups, setGroups] = useState<Group[]>(initialGroups)
   const [groupItems, setGroupItems] = useState<Record<string, Item[]>>(initialGroupItems)
-  const [ungroupedItems, setUngroupedItems] = useState<Item[]>([])
 
   // Generate unique IDs
   const generateId = () => Math.random().toString(36).substr(2, 9)
@@ -31,14 +30,22 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
     setGroupItems(prev => ({ ...prev, [newGroup.id]: [] }))
   }
 
-  // Create a new ungrouped item
-  const createUngroupedItem = () => {
+  // Create a new item in its own group
+  const createNewItem = () => {
     const newItem: Item = {
       id: generateId(),
-      text: `Item ${ungroupedItems.length + 1}`,
+      text: `Item ${groups.length + 1}`,
       color: `hsl(${Math.random() * 360}, 70%, 60%)`,
     }
-    setUngroupedItems(prev => [...prev, newItem])
+    
+    const newGroup: Group = {
+      id: generateId(),
+      title: newItem.text,
+      backgroundColor: `hsl(${Math.random() * 360}, 70%, 90%)`,
+    }
+    
+    setGroups(prev => [...prev, newGroup])
+    setGroupItems(prev => ({ ...prev, [newGroup.id]: [newItem] }))
   }
 
   // Move item within a group
@@ -60,9 +67,6 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
 
   // Transfer item between groups
   const transferItem = (item: Item, targetGroupId: string) => {
-    // Remove from ungrouped items if it's there
-    setUngroupedItems(prev => prev.filter(i => i.id !== item.id))
-    
     // Remove from all groups
     setGroupItems(prev => {
       const newGroupItems = { ...prev }
@@ -77,32 +81,33 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
       ...prev,
       [targetGroupId]: [...(prev[targetGroupId] || []), item]
     }))
-  }
-
-  // Move item within ungrouped items
-  const moveUngroupedItem = (dragIndex: number, hoverIndex: number) => {
-    setUngroupedItems(prev => {
-      const newItems = [...prev]
-      const draggedItem = newItems[dragIndex]
+    
+    // Remove empty groups
+    setGroupItems(prev => {
+      const newGroupItems = { ...prev }
+      const emptyGroupIds = Object.keys(newGroupItems).filter(
+        groupId => newGroupItems[groupId].length === 0
+      )
       
-      if (!draggedItem) return prev
+      // Remove empty groups from groupItems
+      emptyGroupIds.forEach(groupId => {
+        delete newGroupItems[groupId]
+      })
       
-      newItems.splice(dragIndex, 1)
-      newItems.splice(hoverIndex, 0, draggedItem)
+      // Remove empty groups from groups array
+      setGroups(prevGroups => prevGroups.filter(group => !emptyGroupIds.includes(group.id)))
       
-      return newItems
+      return newGroupItems
     })
   }
 
   return {
     groups,
     groupItems,
-    ungroupedItems,
     createGroup,
-    createUngroupedItem,
+    createNewItem,
     moveItemInGroup,
     transferItem,
-    moveUngroupedItem,
   }
 }
 
