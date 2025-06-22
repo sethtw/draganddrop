@@ -1,6 +1,9 @@
 import { CustomDragLayer, GroupDraggableCard, DraggableCard } from './components'
 import { useGroupManager, type Group } from './hooks/useGroupManager'
 import type { Item } from './components'
+import { useDrop } from 'react-dnd'
+import { ItemTypes } from './components/DraggableCard'
+import { useRef } from 'react'
 import './App.css'
 
 function App() {
@@ -32,7 +35,29 @@ function App() {
     createNewItem,
     moveItemInGroup,
     transferItem,
+    createSingleItemGroup,
   } = useGroupManager({ initialGroups, initialGroupItems })
+
+  const dropZoneRef = useRef<HTMLDivElement>(null)
+
+  // Drop zone for creating single-item groups
+  const [{ isOver }, drop] = useDrop({
+    accept: ItemTypes.CARD,
+    drop: (draggedItem: any, monitor) => {
+      // Only handle the drop if no nested target handled it
+      if (!monitor.didDrop()) {
+        // Create a new single-item group from the dragged item
+        createSingleItemGroup(draggedItem)
+        return { dropped: true }
+      }
+    },
+    collect: (monitor) => ({
+      isOver: monitor.isOver({ shallow: false }),
+    }),
+  })
+
+  // Combine the refs
+  drop(dropZoneRef)
 
   // Render individual item or group based on item count
   const renderGroupOrItem = (group: Group) => {
@@ -135,19 +160,37 @@ function App() {
       </div>
 
       <div 
+        ref={dropZoneRef}
         className="drop-zone"
         style={{ 
           display: 'flex', 
           justifyContent: 'center',
           minHeight: '600px',
           padding: '30px',
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          backgroundColor: isOver ? 'rgba(0, 123, 255, 0.1)' : 'rgba(255, 255, 255, 0.95)',
           borderRadius: 16,
-          border: '2px dashed #dee2e6',
+          border: isOver ? '3px dashed #007bff' : '2px dashed #dee2e6',
           backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+          boxShadow: isOver ? '0 8px 32px rgba(0,123,255,0.2)' : '0 8px 32px rgba(0,0,0,0.1)',
+          transition: 'all 0.2s ease',
+          position: 'relative'
         }}
       >
+        {isOver && (
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            color: '#007bff',
+            fontSize: '1.2rem',
+            fontWeight: 'bold',
+            pointerEvents: 'none',
+            zIndex: 10
+          }}>
+            Drop here to create a new group
+          </div>
+        )}
         <div style={{ 
           display: 'flex', 
           flexDirection: 'row', 

@@ -54,6 +54,7 @@ const GroupDraggableCard = ({
     drop: () => {
       // Reset the last move reference when the drag operation ends
       lastMoveRef.current = null
+      return { dropped: true }
     },
     collect: (monitor) => ({
       isOver: monitor.isOver(),

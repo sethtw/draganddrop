@@ -101,6 +101,50 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
     })
   }
 
+  // Create a new single-item group from an existing item
+  const createSingleItemGroup = (item: Item) => {
+    // Remove the item from all existing groups
+    setGroupItems(prev => {
+      const newGroupItems = { ...prev }
+      Object.keys(newGroupItems).forEach(groupId => {
+        newGroupItems[groupId] = newGroupItems[groupId].filter(i => i.id !== item.id)
+      })
+      return newGroupItems
+    })
+    
+    // Create a new group for this item
+    const newGroup: Group = {
+      id: generateId(),
+      title: item.text,
+      backgroundColor: `hsl(${Math.random() * 360}, 70%, 90%)`,
+    }
+    
+    // Add the new group and place the item in it
+    setGroups(prev => [...prev, newGroup])
+    setGroupItems(prev => ({
+      ...prev,
+      [newGroup.id]: [item]
+    }))
+    
+    // Remove empty groups
+    setGroupItems(prev => {
+      const newGroupItems = { ...prev }
+      const emptyGroupIds = Object.keys(newGroupItems).filter(
+        groupId => newGroupItems[groupId].length === 0
+      )
+      
+      // Remove empty groups from groupItems
+      emptyGroupIds.forEach(groupId => {
+        delete newGroupItems[groupId]
+      })
+      
+      // Remove empty groups from groups array
+      setGroups(prevGroups => prevGroups.filter(group => !emptyGroupIds.includes(group.id)))
+      
+      return newGroupItems
+    })
+  }
+
   return {
     groups,
     groupItems,
@@ -108,6 +152,7 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
     createNewItem,
     moveItemInGroup,
     transferItem,
+    createSingleItemGroup,
   }
 }
 
