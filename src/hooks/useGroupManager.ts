@@ -133,6 +133,11 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
     setGroups(prev => [...prev, newGroup])
   }
 
+  // Handle item drop in drop zone - creates a single-item group
+  const handleItemDrop = (item: Item) => {
+    createSingleItemGroup(item)
+  }
+
   return {
     groups,
     groupItems,
@@ -140,7 +145,7 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
     createNewItem,
     moveItemInGroup,
     transferItem,
-    createSingleItemGroup,
+    handleItemDrop,
   }
 }
 

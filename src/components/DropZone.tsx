@@ -18,7 +18,7 @@ const DropZone = ({
   children, 
   className = "drop-zone",
   style = {},
-  hoverMessage = "Drop here to create a new group",
+  hoverMessage = "",
   showHoverMessage = true
 }: DropZoneProps) => {
   const dropZoneRef = useRef<HTMLDivElement>(null)

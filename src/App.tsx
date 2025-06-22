@@ -32,12 +32,8 @@ function App() {
     createNewItem,
     moveItemInGroup,
     transferItem,
-    createSingleItemGroup,
+    handleItemDrop,
   } = useGroupManager({ initialGroups, initialGroupItems })
-
-  const handleItemDrop = (item: Item) => {
-    createSingleItemGroup(item)
-  }
 
   return (
     <div style={{ 

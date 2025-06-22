@@ -36,12 +36,8 @@ function ExampleApp() {
     createNewItem,
     moveItemInGroup,
     transferItem,
-    createSingleItemGroup,
+    handleItemDrop,
   } = useGroupManager({ initialGroups, initialGroupItems })
-
-  const handleItemDrop = (item: any) => {
-    createSingleItemGroup(item)
-  }
 
   return (
     <DndProvider backend={HTML5Backend}>
