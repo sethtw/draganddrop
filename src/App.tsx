@@ -48,6 +48,8 @@ function App() {
           index={0}
           moveCard={(dragIndex, hoverIndex) => moveItemInGroup(group.id, dragIndex, hoverIndex)}
           groupId={group.id}
+          transferItem={transferItem}
+          isSingleItemGroup={true}
         />
       )
     }

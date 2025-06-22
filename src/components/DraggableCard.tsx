@@ -18,6 +18,8 @@ interface DraggableCardProps {
   index: number
   moveCard: (dragIndex: number, hoverIndex: number) => void
   groupId: string
+  transferItem?: (item: Item, targetGroupId: string) => void
+  isSingleItemGroup?: boolean
 }
 
 // Draggable card component
@@ -25,9 +27,12 @@ const DraggableCard = ({
   item, 
   index, 
   moveCard,
-  groupId
+  groupId,
+  transferItem,
+  isSingleItemGroup = false
 }: DraggableCardProps) => {
   const ref = useRef<HTMLDivElement>(null)
+  const lastMoveRef = useRef<{ dragId: string; targetGroupId: string } | null>(null)
 
   const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.CARD,
@@ -37,7 +42,7 @@ const DraggableCard = ({
     }),
   })
 
-  const [, drop] = useDrop({
+  const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.CARD,
     hover: (draggedItem: any, monitor) => {
       if (!ref.current) {
@@ -52,8 +57,19 @@ const DraggableCard = ({
         return
       }
 
-      // If moving between different groups, let the GroupDraggableCard handle it
+      // If moving between different groups
       if (sourceGroupId !== targetGroupId) {
+        // If this is a single item group and we have transferItem function, handle the transfer
+        if (isSingleItemGroup && transferItem) {
+          // Check if we've already moved this item to this target group
+          if (lastMoveRef.current?.dragId === draggedItem.id && 
+              lastMoveRef.current?.targetGroupId === targetGroupId) {
+            return
+          }
+          
+          transferItem(draggedItem, targetGroupId)
+          lastMoveRef.current = { dragId: draggedItem.id, targetGroupId }
+        }
         return
       }
 
@@ -74,6 +90,13 @@ const DraggableCard = ({
       draggedItem.index = hoverIndex
       draggedItem.groupId = targetGroupId
     },
+    drop: () => {
+      // Reset the last move reference when the drag operation ends
+      lastMoveRef.current = null
+    },
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+    }),
   })
 
   drag(drop(ref))
@@ -86,6 +109,10 @@ const DraggableCard = ({
         opacity: isDragging ? 0.5 : 1,
         cursor: 'move',
         marginBottom: 12,
+        border: isOver && isSingleItemGroup ? '3px dashed #007bff' : 'none',
+        borderRadius: isOver && isSingleItemGroup ? 12 : 8,
+        transition: 'all 0.2s ease',
+        boxShadow: isOver && isSingleItemGroup ? '0 4px 12px rgba(0,123,255,0.3)' : '0 2px 4px rgba(0,0,0,0.1)',
       }}
     >
       <div
