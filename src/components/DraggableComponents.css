@@ -1,0 +1,44 @@
+/* Drag and Drop Components CSS */
+
+/* Draggable card styles */
+.draggable-card {
+  transition: all 0.2s ease;
+}
+
+.draggable-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+.draggable-card:active {
+  transform: translateY(0);
+}
+
+/* Drop zone styles */
+.drop-zone {
+  transition: all 0.3s ease;
+}
+
+.drop-zone:hover {
+  background-color: #e9ecef !important;
+  border-color: #adb5bd !important;
+}
+
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+} 
