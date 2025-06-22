@@ -1,21 +1,16 @@
-import { useState } from 'react'
-import { CustomDragLayer, GroupDraggableCard, useSortableList } from './components'
+import { CustomDragLayer, GroupDraggableCard } from './components'
+import { useGroupManager, type Group } from './hooks/useGroupManager'
 import type { Item } from './components'
 import './App.css'
 
-interface Group {
-  id: string
-  title: string
-  backgroundColor: string
-}
-
 function App() {
-  const [groups, setGroups] = useState<Group[]>([
+  // Initial data configuration
+  const initialGroups: Group[] = [
     { id: 'tasks', title: 'Tasks', backgroundColor: '#e3f2fd' },
     { id: 'ideas', title: 'Ideas', backgroundColor: '#f3e5f5' },
-  ])
+  ]
 
-  const [groupItems, setGroupItems] = useState<Record<string, Item[]>>({
+  const initialGroupItems: Record<string, Item[]> = {
     tasks: [
       { id: '1', text: 'Task 1', color: '#ff6b6b' },
       { id: '2', text: 'Task 2', color: '#4ecdc4' },
@@ -28,86 +23,18 @@ function App() {
       { id: '7', text: 'Idea 3', color: '#54a0ff' },
       { id: '8', text: 'Idea 4', color: '#5f27cd' },
     ],
-  })
-
-  const [ungroupedItems, setUngroupedItems] = useState<Item[]>([])
-
-  // Generate unique IDs
-  const generateId = () => Math.random().toString(36).substr(2, 9)
-
-  // Create a new group
-  const createGroup = () => {
-    const newGroup: Group = {
-      id: generateId(),
-      title: `Group ${groups.length + 1}`,
-      backgroundColor: `hsl(${Math.random() * 360}, 70%, 90%)`,
-    }
-    setGroups(prev => [...prev, newGroup])
-    setGroupItems(prev => ({ ...prev, [newGroup.id]: [] }))
   }
 
-  // Create a new ungrouped item
-  const createUngroupedItem = () => {
-    const newItem: Item = {
-      id: generateId(),
-      text: `Item ${ungroupedItems.length + 1}`,
-      color: `hsl(${Math.random() * 360}, 70%, 60%)`,
-    }
-    setUngroupedItems(prev => [...prev, newItem])
-  }
-
-  // Move item within a group
-  const moveItemInGroup = (groupId: string, dragIndex: number, hoverIndex: number) => {
-    setGroupItems(prev => {
-      const newGroupItems = { ...prev }
-      const items = [...newGroupItems[groupId]]
-      const draggedItem = items[dragIndex]
-      
-      if (!draggedItem) return prev
-      
-      items.splice(dragIndex, 1)
-      items.splice(hoverIndex, 0, draggedItem)
-      
-      newGroupItems[groupId] = items
-      return newGroupItems
-    })
-  }
-
-  // Transfer item between groups
-  const transferItem = (item: Item, targetGroupId: string) => {
-    // Remove from ungrouped items if it's there
-    setUngroupedItems(prev => prev.filter(i => i.id !== item.id))
-    
-    // Remove from all groups
-    setGroupItems(prev => {
-      const newGroupItems = { ...prev }
-      Object.keys(newGroupItems).forEach(groupId => {
-        newGroupItems[groupId] = newGroupItems[groupId].filter(i => i.id !== item.id)
-      })
-      return newGroupItems
-    })
-    
-    // Add to target group
-    setGroupItems(prev => ({
-      ...prev,
-      [targetGroupId]: [...(prev[targetGroupId] || []), item]
-    }))
-  }
-
-  // Move item within ungrouped items
-  const moveUngroupedItem = (dragIndex: number, hoverIndex: number) => {
-    setUngroupedItems(prev => {
-      const newItems = [...prev]
-      const draggedItem = newItems[dragIndex]
-      
-      if (!draggedItem) return prev
-      
-      newItems.splice(dragIndex, 1)
-      newItems.splice(hoverIndex, 0, draggedItem)
-      
-      return newItems
-    })
-  }
+  const {
+    groups,
+    groupItems,
+    ungroupedItems,
+    createGroup,
+    createUngroupedItem,
+    moveItemInGroup,
+    transferItem,
+    moveUngroupedItem,
+  } = useGroupManager({ initialGroups, initialGroupItems })
 
   return (
     <div style={{ 
