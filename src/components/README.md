@@ -1,42 +1,138 @@
 # Drag and Drop Components
 
-This directory contains reusable drag-and-drop components built with react-dnd.
+A collection of reusable React components for building drag and drop interfaces with group management capabilities.
 
 ## Components
 
-### DraggableCard
-A draggable card component that can be reordered in a list.
+### DropZone
+A drop zone component that accepts draggable items and provides visual feedback.
+
+```tsx
+import { DropZone } from './components'
+
+<DropZone 
+  onItemDrop={(item) => handleItemDrop(item)}
+  hoverMessage="Drop here to create a new group"
+  showHoverMessage={true}
+  style={{ minHeight: '400px' }}
+>
+  {/* Your content */}
+</DropZone>
+```
 
 **Props:**
-- `item: Item` - The item data to display
-- `index: number` - The current index of the item in the list
-- `moveCard: (dragIndex: number, hoverIndex: number) => void` - Callback function to handle reordering
+- `onItemDrop: (item: Item) => void` - Callback when an item is dropped
+- `children: React.ReactNode` - Content to render inside the drop zone
+- `className?: string` - CSS class name (default: "drop-zone")
+- `style?: React.CSSProperties` - Inline styles
+- `hoverMessage?: string` - Message to show when hovering (default: "Drop here to create a new group")
+- `showHoverMessage?: boolean` - Whether to show hover message (default: true)
+
+### GroupManager
+Manages the rendering of groups and individual items based on item count.
+
+```tsx
+import { GroupManager } from './components'
+
+<GroupManager
+  groups={groups}
+  groupItems={groupItems}
+  moveItemInGroup={moveItemInGroup}
+  transferItem={transferItem}
+  containerStyle={{ gap: '16px' }}
+/>
+```
+
+**Props:**
+- `groups: Group[]` - Array of groups
+- `groupItems: Record<string, Item[]>` - Items organized by group ID
+- `moveItemInGroup: (groupId: string, dragIndex: number, hoverIndex: number) => void` - Handler for moving items within a group
+- `transferItem: (item: Item, targetGroupId: string) => void` - Handler for transferring items between groups
+- `containerStyle?: React.CSSProperties` - Styles for the container
+
+### ControlPanel
+A control panel with buttons for creating groups and items.
+
+```tsx
+import { ControlPanel } from './components'
+
+<ControlPanel
+  onCreateGroup={createGroup}
+  onCreateNewItem={createNewItem}
+  createGroupText="+ Add Group"
+  createItemText="+ Add Item"
+/>
+```
+
+**Props:**
+- `onCreateGroup: () => void` - Handler for creating a new group
+- `onCreateNewItem: () => void` - Handler for creating a new item
+- `createGroupText?: string` - Text for create group button (default: "+ Create New Group")
+- `createItemText?: string` - Text for create item button (default: "+ Create New Item")
+- `style?: React.CSSProperties` - Styles for the control panel
+- `buttonStyle?: React.CSSProperties` - Styles for the buttons
+
+### DraggableCard
+A draggable card component that can represent an individual item.
+
+```tsx
+import { DraggableCard } from './components'
+
+<DraggableCard
+  item={item}
+  index={0}
+  moveCard={(dragIndex, hoverIndex) => moveItemInGroup(groupId, dragIndex, hoverIndex)}
+  groupId={groupId}
+  transferItem={transferItem}
+  isSingleItemGroup={true}
+/>
+```
+
+**Props:**
+- `item: Item` - The item to display
+- `index: number` - Index of the item in its group
+- `moveCard: (dragIndex: number, hoverIndex: number) => void` - Handler for moving the card
+- `groupId: string` - ID of the group this card belongs to
+- `transferItem?: (item: Item, targetGroupId: string) => void` - Handler for transferring the item
+- `isSingleItemGroup?: boolean` - Whether this card represents a single-item group
+
+### GroupDraggableCard
+A container component for groups with multiple items.
+
+```tsx
+import { GroupDraggableCard } from './components'
+
+<GroupDraggableCard
+  groupId={groupId}
+  title={title}
+  items={items}
+  moveCard={(dragIndex, hoverIndex) => moveItemInGroup(groupId, dragIndex, hoverIndex)}
+  transferItem={transferItem}
+  backgroundColor={backgroundColor}
+/>
+```
+
+**Props:**
+- `groupId: string` - ID of the group
+- `title: string` - Title of the group
+- `items: Item[]` - Items in the group
+- `moveCard: (dragIndex: number, hoverIndex: number) => void` - Handler for moving items within the group
+- `transferItem?: (item: Item, targetGroupId: string) => void` - Handler for transferring items
+- `backgroundColor?: string` - Background color of the group
 
 ### CustomDragLayer
-A custom drag preview component that shows the dragged item with rotation and opacity effects.
+A custom drag layer for showing drag previews.
 
-**Features:**
-- 20-degree rotation (currently set to -5deg)
-- 75% opacity
-- Follows the cursor during drag operations
+```tsx
+import { CustomDragLayer } from './components'
 
-## Hooks
-
-### useSortableList
-A custom hook that manages the state and operations for a sortable list.
-
-**Returns:**
-- `items: Item[]` - Current list of items
-- `moveItem: (dragIndex: number, hoverIndex: number) => void` - Function to move items
-- `addItem: (item: Item) => void` - Function to add new items
-- `removeItem: (id: string) => void` - Function to remove items by ID
-- `updateItem: (id: string, updates: Partial<Item>) => void` - Function to update items
-- `setItems: (items: Item[]) => void` - Function to set the entire list
+<CustomDragLayer />
+```
 
 ## Types
 
 ### Item
-```typescript
+```tsx
 interface Item {
   id: string
   text: string
@@ -44,137 +140,91 @@ interface Item {
 }
 ```
 
+### Group
+```tsx
+interface Group {
+  id: string
+  title: string
+  backgroundColor: string
+}
+```
+
 ## Usage Example
 
-### Basic Usage
 ```tsx
-import { useState } from 'react'
+import React from 'react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import { CustomDragLayer, DraggableCard } from './components'
-import type { Item } from './components'
+import { 
+  DropZone, 
+  GroupManager, 
+  ControlPanel, 
+  CustomDragLayer 
+} from './components'
+import { useGroupManager } from './hooks/useGroupManager'
 
 function MyApp() {
-  const [items, setItems] = useState<Item[]>([
-    { id: '1', text: 'Item 1', color: '#ff6b6b' },
-    { id: '2', text: 'Item 2', color: '#4ecdc4' },
-  ])
+  const {
+    groups,
+    groupItems,
+    createGroup,
+    createNewItem,
+    moveItemInGroup,
+    transferItem,
+    createSingleItemGroup,
+  } = useGroupManager({ initialGroups: [], initialGroupItems: {} })
 
-  const moveCard = (dragIndex: number, hoverIndex: number) => {
-    const dragCard = items[dragIndex]
-    const newItems = [...items]
-    newItems.splice(dragIndex, 1)
-    newItems.splice(hoverIndex, 0, dragCard)
-    setItems(newItems)
+  const handleItemDrop = (item) => {
+    createSingleItemGroup(item)
   }
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div>
-        {items.map((item, index) => (
-          <DraggableCard
-            key={item.id}
-            item={item}
-            index={index}
-            moveCard={moveCard}
-          />
-        ))}
-        <CustomDragLayer />
-      </div>
-    </DndProvider>
-  )
-}
-```
-
-### Using the Hook (Recommended)
-```tsx
-import { DndProvider } from 'react-dnd'
-import { HTML5Backend } from 'react-dnd-html5-backend'
-import { CustomDragLayer, DraggableCard, useSortableList } from './components'
-import type { Item } from './components'
-
-function MyApp() {
-  const initialItems: Item[] = [
-    { id: '1', text: 'Item 1', color: '#ff6b6b' },
-    { id: '2', text: 'Item 2', color: '#4ecdc4' },
-  ]
-
-  const { items, moveItem, addItem, removeItem } = useSortableList(initialItems)
-
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <div>
-        {items.map((item, index) => (
-          <DraggableCard
-            key={item.id}
-            item={item}
-            index={index}
-            moveCard={moveItem}
-          />
-        ))}
-        <CustomDragLayer />
+        <h1>My Drag and Drop App</h1>
         
-        {/* Example: Add a new item */}
-        <button onClick={() => addItem({ id: Date.now().toString(), text: 'New Item', color: '#ff9ff3' })}>
-          Add Item
-        </button>
+        <ControlPanel 
+          onCreateGroup={createGroup}
+          onCreateNewItem={createNewItem}
+        />
+
+        <DropZone onItemDrop={handleItemDrop}>
+          <GroupManager
+            groups={groups}
+            groupItems={groupItems}
+            moveItemInGroup={moveItemInGroup}
+            transferItem={transferItem}
+          />
+        </DropZone>
+        
+        <CustomDragLayer />
       </div>
     </DndProvider>
   )
 }
 ```
 
-## Required Dependencies
+## Features
 
-Make sure you have the following dependencies installed:
+- **Nested Drop Targets**: Proper handling of nested drop zones using React DnD's shallow monitoring
+- **Group Management**: Automatic creation and cleanup of groups based on item count
+- **Visual Feedback**: Hover effects and drag previews
+- **Flexible Styling**: Customizable styles for all components
+- **TypeScript Support**: Full TypeScript definitions included
 
-```bash
-npm install react-dnd react-dnd-html5-backend
-```
+## Dependencies
 
-## CSS Requirements
+- `react-dnd`
+- `react-dnd-html5-backend`
+- `react` (16.8+ for hooks)
 
-The components include their own CSS file (`DraggableComponents.css`) that will be automatically imported. If you want to use your own styling, you can override the CSS classes:
+## Installation
 
-```css
-.draggable-card {
-  transition: all 0.2s ease;
-}
-
-.draggable-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-}
-
-.draggable-card:active {
-  transform: translateY(0);
-}
-
-.drop-zone {
-  transition: all 0.3s ease;
-}
-
-.drop-zone:hover {
-  background-color: #e9ecef !important;
-  border-color: #adb5bd !important;
-}
-```
-
-## Customization
-
-You can customize the appearance by modifying the inline styles in each component:
-
-- **DraggableCard**: Modify the card dimensions, colors, and styling in `DraggableCard.tsx`
-- **CustomDragLayer**: Adjust the rotation angle, opacity, and shadow effects in `CustomDragLayer.tsx`
-
-## File Structure
-
-```
-src/components/
-├── CustomDragLayer.tsx      # Custom drag preview component
-├── DraggableCard.tsx        # Draggable card component
-├── DraggableComponents.css  # Component-specific styles
-├── useSortableList.ts       # Custom hook for list management
-├── index.ts                 # Export file for easy imports
-└── README.md               # This documentation
-``` 
+1. Copy the `components` folder to your project
+2. Copy the `hooks/useGroupManager.ts` file
+3. Install required dependencies:
+   ```bash
+   npm install react-dnd react-dnd-html5-backend
+   ```
+4. Wrap your app with `DndProvider` from react-dnd
+5. Import and use the components as needed 

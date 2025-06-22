@@ -67,29 +67,22 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
 
   // Transfer item between groups
   const transferItem = (item: Item, targetGroupId: string) => {
-    // Remove from all groups
     setGroupItems(prev => {
       const newGroupItems = { ...prev }
+      
+      // Remove from all groups
       Object.keys(newGroupItems).forEach(groupId => {
         newGroupItems[groupId] = newGroupItems[groupId].filter(i => i.id !== item.id)
       })
-      return newGroupItems
-    })
-    
-    // Add to target group
-    setGroupItems(prev => ({
-      ...prev,
-      [targetGroupId]: [...(prev[targetGroupId] || []), item]
-    }))
-    
-    // Remove empty groups
-    setGroupItems(prev => {
-      const newGroupItems = { ...prev }
+      
+      // Add to target group
+      newGroupItems[targetGroupId] = [...(newGroupItems[targetGroupId] || []), item]
+      
+      // Remove empty groups
       const emptyGroupIds = Object.keys(newGroupItems).filter(
         groupId => newGroupItems[groupId].length === 0
       )
       
-      // Remove empty groups from groupItems
       emptyGroupIds.forEach(groupId => {
         delete newGroupItems[groupId]
       })
@@ -103,15 +96,6 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
 
   // Create a new single-item group from an existing item
   const createSingleItemGroup = (item: Item) => {
-    // Remove the item from all existing groups
-    setGroupItems(prev => {
-      const newGroupItems = { ...prev }
-      Object.keys(newGroupItems).forEach(groupId => {
-        newGroupItems[groupId] = newGroupItems[groupId].filter(i => i.id !== item.id)
-      })
-      return newGroupItems
-    })
-    
     // Create a new group for this item
     const newGroup: Group = {
       id: generateId(),
@@ -119,21 +103,22 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
       backgroundColor: `hsl(${Math.random() * 360}, 70%, 90%)`,
     }
     
-    // Add the new group and place the item in it
-    setGroups(prev => [...prev, newGroup])
-    setGroupItems(prev => ({
-      ...prev,
-      [newGroup.id]: [item]
-    }))
-    
-    // Remove empty groups
     setGroupItems(prev => {
       const newGroupItems = { ...prev }
+      
+      // Remove the item from all existing groups
+      Object.keys(newGroupItems).forEach(groupId => {
+        newGroupItems[groupId] = newGroupItems[groupId].filter(i => i.id !== item.id)
+      })
+      
+      // Add the new group and place the item in it
+      newGroupItems[newGroup.id] = [item]
+      
+      // Remove empty groups
       const emptyGroupIds = Object.keys(newGroupItems).filter(
         groupId => newGroupItems[groupId].length === 0
       )
       
-      // Remove empty groups from groupItems
       emptyGroupIds.forEach(groupId => {
         delete newGroupItems[groupId]
       })
@@ -143,6 +128,9 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
       
       return newGroupItems
     })
+    
+    // Add the new group
+    setGroups(prev => [...prev, newGroup])
   }
 
   return {

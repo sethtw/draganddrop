@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { useDrag, useDrop } from 'react-dnd'
 import './DraggableComponents.css'
 
@@ -33,6 +33,11 @@ const DraggableCard = ({
 }: DraggableCardProps) => {
   const ref = useRef<HTMLDivElement>(null)
   const lastMoveRef = useRef<{ dragId: string; targetGroupId: string } | null>(null)
+
+  // Reset lastMoveRef when the item changes (e.g., after a transfer)
+  useEffect(() => {
+    lastMoveRef.current = null
+  }, [item.id, groupId, index])
 
   const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.CARD,
@@ -86,9 +91,10 @@ const DraggableCard = ({
         return
       }
 
+      // Call moveCard without mutating the draggedItem
       moveCard(dragIndex, hoverIndex)
-      draggedItem.index = hoverIndex
-      draggedItem.groupId = targetGroupId
+      
+      // Don't mutate the draggedItem - let the state update handle the index changes
     },
     drop: () => {
       // Reset the last move reference when the drag operation ends

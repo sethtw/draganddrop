@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { useDrop } from 'react-dnd'
 import DraggableCard, { ItemTypes } from './DraggableCard'
 import type { Item } from './DraggableCard'
@@ -23,6 +23,11 @@ const GroupDraggableCard = ({
 }: GroupDraggableCardProps) => {
   const ref = useRef<HTMLDivElement>(null)
   const lastMoveRef = useRef<{ dragId: string; targetGroupId: string } | null>(null)
+
+  // Reset lastMoveRef when the items change
+  useEffect(() => {
+    lastMoveRef.current = null
+  }, [items.length, items.map(item => item.id).join(',')])
 
   const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.CARD,
@@ -108,7 +113,7 @@ const GroupDraggableCard = ({
         ) : (
           items.map((item, index) => (
             <DraggableCard
-              key={item.id}
+              key={`${item.id}-${index}`}
               item={item}
               index={index}
               moveCard={moveCard}
