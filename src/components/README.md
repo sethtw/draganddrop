@@ -1,11 +1,11 @@
 # Drag and Drop Components
 
-A collection of reusable React components for building drag and drop interfaces with group management capabilities.
+A collection of reusable React components for building drag and drop interfaces with group management capabilities. This library provides a complete solution for creating interactive group-based drag and drop applications.
 
 ## Components
 
 ### DropZone
-A drop zone component that accepts draggable items and provides visual feedback.
+A drop zone component that accepts draggable items and provides visual feedback. When items are dropped here, they automatically create new single-item groups.
 
 ```tsx
 import { DropZone } from './components'
@@ -29,7 +29,7 @@ import { DropZone } from './components'
 - `showHoverMessage?: boolean` - Whether to show hover message (default: true)
 
 ### GroupManager
-Manages the rendering of groups and individual items based on item count.
+Manages the rendering of groups and individual items based on item count. Automatically handles the display logic for single-item groups vs multi-item groups.
 
 ```tsx
 import { GroupManager } from './components'
@@ -51,7 +51,7 @@ import { GroupManager } from './components'
 - `containerStyle?: React.CSSProperties` - Styles for the container
 
 ### ControlPanel
-A control panel with buttons for creating groups and items.
+A control panel with buttons for creating groups and items. Provides a clean interface for user interactions.
 
 ```tsx
 import { ControlPanel } from './components'
@@ -73,7 +73,7 @@ import { ControlPanel } from './components'
 - `buttonStyle?: React.CSSProperties` - Styles for the buttons
 
 ### DraggableCard
-A draggable card component that can represent an individual item.
+A draggable card component that can represent an individual item. Used for both single-item groups and items within multi-item groups.
 
 ```tsx
 import { DraggableCard } from './components'
@@ -97,7 +97,7 @@ import { DraggableCard } from './components'
 - `isSingleItemGroup?: boolean` - Whether this card represents a single-item group
 
 ### GroupDraggableCard
-A container component for groups with multiple items.
+A container component for groups with multiple items. Provides a visual container and handles drag interactions for the group.
 
 ```tsx
 import { GroupDraggableCard } from './components'
@@ -121,13 +121,15 @@ import { GroupDraggableCard } from './components'
 - `backgroundColor?: string` - Background color of the group
 
 ### CustomDragLayer
-A custom drag layer for showing drag previews.
+A custom drag layer for showing drag previews. Provides visual feedback during drag operations.
 
 ```tsx
 import { CustomDragLayer } from './components'
 
 <CustomDragLayer />
 ```
+
+**Note:** This component doesn't accept props and automatically handles drag preview rendering.
 
 ## Types
 
@@ -149,6 +151,37 @@ interface Group {
 }
 ```
 
+## Custom Hook
+
+### useGroupManager
+A custom hook that provides complete group management functionality.
+
+```tsx
+import { useGroupManager } from '../hooks/useGroupManager'
+
+const {
+  groups,
+  groupItems,
+  createGroup,
+  createNewItem,
+  moveItemInGroup,
+  transferItem,
+  handleItemDrop,
+} = useGroupManager({ 
+  initialGroups: [], 
+  initialGroupItems: {} 
+})
+```
+
+**Returns:**
+- `groups: Group[]` - Array of all groups
+- `groupItems: Record<string, Item[]>` - Items organized by group ID
+- `createGroup: () => void` - Creates a new empty group
+- `createNewItem: () => void` - Creates a new item in its own group
+- `moveItemInGroup: (groupId: string, dragIndex: number, hoverIndex: number) => void` - Moves items within a group
+- `transferItem: (item: Item, targetGroupId: string) => void` - Transfers items between groups
+- `handleItemDrop: (item: Item) => void` - Handles dropping items in the drop zone to create new groups
+
 ## Usage Example
 
 ```tsx
@@ -161,7 +194,7 @@ import {
   ControlPanel, 
   CustomDragLayer 
 } from './components'
-import { useGroupManager } from './hooks/useGroupManager'
+import { useGroupManager } from '../hooks/useGroupManager'
 
 function MyApp() {
   const {
@@ -171,12 +204,8 @@ function MyApp() {
     createNewItem,
     moveItemInGroup,
     transferItem,
-    createSingleItemGroup,
+    handleItemDrop,
   } = useGroupManager({ initialGroups: [], initialGroupItems: {} })
-
-  const handleItemDrop = (item) => {
-    createSingleItemGroup(item)
-  }
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -204,27 +233,29 @@ function MyApp() {
 }
 ```
 
-## Features
+## Key Features
 
-- **Nested Drop Targets**: Proper handling of nested drop zones using React DnD's shallow monitoring
-- **Group Management**: Automatic creation and cleanup of groups based on item count
-- **Visual Feedback**: Hover effects and drag previews
-- **Flexible Styling**: Customizable styles for all components
-- **TypeScript Support**: Full TypeScript definitions included
+- **Automatic Group Management**: Groups are automatically created and removed based on item count
+- **Flexible Item Transfer**: Items can be moved between groups with automatic group cleanup
+- **Visual Feedback**: Rich drag previews and hover states
+- **Type Safety**: Full TypeScript support with comprehensive type definitions
+- **Responsive Design**: Components adapt to different screen sizes
+- **Accessibility**: Built with accessibility best practices in mind
+
+## Styling
+
+All components support custom styling through the `style` prop and can be further customized using CSS classes. The components use modern CSS features and provide smooth animations for drag interactions.
+
+## Browser Support
+
+This library requires a modern browser with support for:
+- ES6+ features
+- CSS Grid and Flexbox
+- HTML5 Drag and Drop API
 
 ## Dependencies
 
-- `react-dnd`
-- `react-dnd-html5-backend`
-- `react` (16.8+ for hooks)
-
-## Installation
-
-1. Copy the `components` folder to your project
-2. Copy the `hooks/useGroupManager.ts` file
-3. Install required dependencies:
-   ```bash
-   npm install react-dnd react-dnd-html5-backend
-   ```
-4. Wrap your app with `DndProvider` from react-dnd
-5. Import and use the components as needed 
+- React 19+
+- react-dnd 16+
+- react-dnd-html5-backend 16+
+- TypeScript 5.8+ 
