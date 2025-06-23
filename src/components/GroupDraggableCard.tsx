@@ -1,5 +1,5 @@
 import { useRef, useCallback } from 'react'
-import { type DropTargetMonitor, useDrop } from 'react-dnd'
+import { type DragSourceMonitor, type DropTargetMonitor, useDrag, useDrop } from 'react-dnd'
 import DraggableCard, { ItemTypes } from './DraggableCard'
 import type { Item } from './DraggableCard'
 import './DraggableComponents.css'
@@ -49,13 +49,20 @@ const GroupDraggableCard = ({
     }
   }, [transferItem])
 
+  const [{ isDragging }, drag] = useDrag({
+    type: ItemTypes.GROUP,
+    item: { groupId },
+    collect: (monitor: DragSourceMonitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  })
+
   const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.CARD,
     hover: (draggedItem: any, monitor) => {
       if (!ref.current) {
         return
       }
-      console.log('GroupDraggableCard useDrop hover:', draggedItem, '--', monitor)
       const sourceGroupId = draggedItem.groupId
       const targetGroupId = groupId
 
@@ -88,7 +95,7 @@ const GroupDraggableCard = ({
     }),
   })
 
-  drop(ref)
+  drag(drop(ref))
 
   return (
     <div

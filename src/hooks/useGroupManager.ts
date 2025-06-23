@@ -98,14 +98,14 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
       const newGroupItems = { ...prev }
       const sourceGroupId = item.groupId
       
-      // Remove from source group only
-      if (newGroupItems[sourceGroupId]) {
-        newGroupItems[sourceGroupId] = newGroupItems[sourceGroupId].filter(i => i.id !== item.id)
-      }
-      
       // Add to target group with updated groupId
       const updatedItem = { ...item, groupId: targetGroupId }
       newGroupItems[targetGroupId] = [...(newGroupItems[targetGroupId] || []), updatedItem]
+      
+      // Remove from source group
+      if (newGroupItems[sourceGroupId]) {
+        newGroupItems[sourceGroupId] = newGroupItems[sourceGroupId].filter(i => i.id !== item.id)
+      }
       
       return newGroupItems
     })

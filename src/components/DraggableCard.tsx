@@ -62,7 +62,6 @@ const DraggableCard = ({
     item: item,
     end: (item, monitor) => {
       const dropResult = monitor.getDropResult()
-      console.log('DraggableCard useDrag end:', item, monitor, dropResult)
       // Reset refs when drag ends
       lastHoverIndexRef.current = null
       lastHoverTimeRef.current = 0
@@ -85,7 +84,6 @@ const DraggableCard = ({
       if (!ref.current) {
         return
       }
-      console.log('DraggableCard useDrop hover:', draggedItem, '--', monitor)
       const dragIndex = draggedItem.index
       const hoverIndex = index
       const sourceGroupId = draggedItem.groupId
