@@ -30,6 +30,7 @@ function App() {
     groupItems,
     createGroup,
     createNewItem,
+    createItemInGroup,
     moveItemInGroup,
     transferItem,
     handleItemDrop,
@@ -57,6 +58,8 @@ function App() {
       <ControlPanel 
         onCreateGroup={createGroup}
         onCreateNewItem={createNewItem}
+        onCreateItemInGroup={createItemInGroup}
+        groups={groups}
       />
 
       <DropZone onItemDrop={handleItemDrop}>

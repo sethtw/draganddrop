@@ -48,6 +48,20 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
     setGroupItems(prev => ({ ...prev, [newGroup.id]: [newItem] }))
   }
 
+  // Create a new item in an existing group
+  const createItemInGroup = (groupId: string) => {
+    const newItem: Item = {
+      id: generateId(),
+      text: `Item ${Object.values(groupItems).flat().length + 1}`,
+      color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+    }
+    
+    setGroupItems(prev => ({
+      ...prev,
+      [groupId]: [...(prev[groupId] || []), newItem]
+    }))
+  }
+
   // Move item within a group
   const moveItemInGroup = (groupId: string, dragIndex: number, hoverIndex: number) => {
     setGroupItems(prev => {
@@ -76,7 +90,7 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
       })
       
       // Add to target group
-      newGroupItems[targetGroupId] = [...(newGroupItems[targetGroupId] || []), item]
+      newGroupItems[targetGroupId] = [...(newGroupItems[targetGroupId] || []), item] // add item to group by creating new
       
       // Remove empty groups
       const emptyGroupIds = Object.keys(newGroupItems).filter(
@@ -143,6 +157,7 @@ export const useGroupManager = ({ initialGroups, initialGroupItems }: UseGroupMa
     groupItems,
     createGroup,
     createNewItem,
+    createItemInGroup,
     moveItemInGroup,
     transferItem,
     handleItemDrop,
