@@ -1,4 +1,4 @@
-import { DropZone, GroupManager, ControlPanel } from './components'
+import { DropZone, GroupManager, ControlPanel, ItemAnalytics } from './components'
 import { useGroupManager, type Group } from './hooks/useGroupManager'
 import type { Item } from './components'
 import './App.css'
@@ -10,31 +10,28 @@ function App() {
     { id: 'ideas', title: 'Ideas', backgroundColor: '#f3e5f5' },
   ]
 
-  const initialGroupItems: Record<string, Item[]> = {
-    tasks: [
-      { id: '1', text: 'Task 1', color: '#ff6b6b', groupId: 'tasks' },
-      { id: '2', text: 'Task 2', color: '#4ecdc4', groupId: 'tasks' },
-      { id: '3', text: 'Task 3', color: '#45b7d1', groupId: 'tasks' },
-      { id: '4', text: 'Task 4', color: '#96ceb4', groupId: 'tasks' },
-    ],
-    ideas: [
-      { id: '5', text: 'Idea 1', color: '#feca57', groupId: 'ideas' },
-      { id: '6', text: 'Idea 2', color: '#ff9ff3', groupId: 'ideas' },
-      { id: '7', text: 'Idea 3', color: '#54a0ff', groupId: 'ideas' },
-      { id: '8', text: 'Idea 4', color: '#5f27cd', groupId: 'ideas' },
-    ],
-  }
+  const initialItems: Item[] = [
+    { id: '1', text: 'Task 1', color: '#ff6b6b', groupId: 'tasks' },
+    { id: '2', text: 'Task 2', color: '#4ecdc4', groupId: 'tasks' },
+    { id: '3', text: 'Task 3', color: '#45b7d1', groupId: 'tasks' },
+    { id: '4', text: 'Task 4', color: '#96ceb4', groupId: 'tasks' },
+    { id: '5', text: 'Idea 1', color: '#feca57', groupId: 'ideas' },
+    { id: '6', text: 'Idea 2', color: '#ff9ff3', groupId: 'ideas' },
+    { id: '7', text: 'Idea 3', color: '#54a0ff', groupId: 'ideas' },
+    { id: '8', text: 'Idea 4', color: '#5f27cd', groupId: 'ideas' },
+  ]
 
   const {
     groups,
     groupItems,
+    items,
     createGroup,
     createNewItem,
     createItemInGroup,
     moveItemInGroup,
     transferItem,
     handleItemDrop,
-  } = useGroupManager({ initialGroups, initialGroupItems })
+  } = useGroupManager({ initialGroups, initialItems })
 
   return (
     <div style={{ 
@@ -70,6 +67,8 @@ function App() {
           transferItem={transferItem}
         />
       </DropZone>
+
+      <ItemAnalytics items={items} />
     </div>
   )
 }
