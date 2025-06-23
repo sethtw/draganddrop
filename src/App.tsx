@@ -12,16 +12,16 @@ function App() {
 
   const initialGroupItems: Record<string, Item[]> = {
     tasks: [
-      { id: '1', text: 'Task 1', color: '#ff6b6b' },
-      { id: '2', text: 'Task 2', color: '#4ecdc4' },
-      { id: '3', text: 'Task 3', color: '#45b7d1' },
-      { id: '4', text: 'Task 4', color: '#96ceb4' },
+      { id: '1', text: 'Task 1', color: '#ff6b6b', groupId: 'tasks' },
+      { id: '2', text: 'Task 2', color: '#4ecdc4', groupId: 'tasks' },
+      { id: '3', text: 'Task 3', color: '#45b7d1', groupId: 'tasks' },
+      { id: '4', text: 'Task 4', color: '#96ceb4', groupId: 'tasks' },
     ],
     ideas: [
-      { id: '5', text: 'Idea 1', color: '#feca57' },
-      { id: '6', text: 'Idea 2', color: '#ff9ff3' },
-      { id: '7', text: 'Idea 3', color: '#54a0ff' },
-      { id: '8', text: 'Idea 4', color: '#5f27cd' },
+      { id: '5', text: 'Idea 1', color: '#feca57', groupId: 'ideas' },
+      { id: '6', text: 'Idea 2', color: '#ff9ff3', groupId: 'ideas' },
+      { id: '7', text: 'Idea 3', color: '#54a0ff', groupId: 'ideas' },
+      { id: '8', text: 'Idea 4', color: '#5f27cd', groupId: 'ideas' },
     ],
   }
 

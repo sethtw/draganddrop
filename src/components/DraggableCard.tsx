@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef } from 'react'
 import { useDrag, useDrop } from 'react-dnd'
 import './DraggableComponents.css'
 
@@ -6,6 +6,7 @@ export interface Item {
   id: string
   text: string
   color: string
+  groupId: string
 }
 
 export const ItemTypes = {
@@ -34,14 +35,9 @@ const DraggableCard = ({
   const ref = useRef<HTMLDivElement>(null)
   const lastMoveRef = useRef<{ dragId: string; targetGroupId: string } | null>(null)
 
-  // Reset lastMoveRef when the item changes (e.g., after a transfer)
-  useEffect(() => {
-    lastMoveRef.current = null
-  }, [item.id, groupId, index])
-
   const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.CARD,
-    item: { index, groupId, ...item },
+    item: { index, ...item },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
