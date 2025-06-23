@@ -1,5 +1,5 @@
-import { useRef } from 'react'
-import { useDrop } from 'react-dnd'
+import { useRef, useCallback } from 'react'
+import { type DropTargetMonitor, useDrop } from 'react-dnd'
 import DraggableCard, { ItemTypes } from './DraggableCard'
 import type { Item } from './DraggableCard'
 import './DraggableComponents.css'
@@ -23,6 +23,31 @@ const GroupDraggableCard = ({
 }: GroupDraggableCardProps) => {
   const ref = useRef<HTMLDivElement>(null)
   const lastMoveRef = useRef<{ dragId: string; targetGroupId: string } | null>(null)
+  const lastHoverTimeRef = useRef<number>(0)
+
+  // Throttled transfer function to prevent rapid updates
+  const throttledTransferItem = useCallback((draggedItem: any, targetGroupId: string) => {
+    const now = Date.now()
+    const throttleDelay = 100 // 100ms throttle
+    
+    // Check if we should throttle this transfer
+    if (now - lastHoverTimeRef.current < throttleDelay) {
+      return
+    }
+    
+    // Check if we've already moved this item to this target group
+    if (lastMoveRef.current?.dragId === draggedItem.id && 
+        lastMoveRef.current?.targetGroupId === targetGroupId) {
+      return
+    }
+    
+    lastHoverTimeRef.current = now
+    lastMoveRef.current = { dragId: draggedItem.id, targetGroupId }
+    
+    if (transferItem) {
+      transferItem(draggedItem, targetGroupId)
+    }
+  }, [transferItem])
 
   const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.CARD,
@@ -30,7 +55,7 @@ const GroupDraggableCard = ({
       if (!ref.current) {
         return
       }
-      
+      console.log('GroupDraggableCard useDrop hover:', draggedItem, '--', monitor)
       const sourceGroupId = draggedItem.groupId
       const targetGroupId = groupId
 
@@ -39,25 +64,27 @@ const GroupDraggableCard = ({
         return
       }
 
-      // Check if we've already moved this item to this target group
-      if (lastMoveRef.current?.dragId === draggedItem.id && 
-          lastMoveRef.current?.targetGroupId === targetGroupId) {
-        return
-      }
-
-      // If transferItem function is provided, use it for cross-group transfers
-      if (transferItem) {
-        transferItem(draggedItem, targetGroupId)
-        lastMoveRef.current = { dragId: draggedItem.id, targetGroupId }
-      }
+      // Use throttled transfer function
+      throttledTransferItem(draggedItem, targetGroupId)
     },
     drop: () => {
       // Reset the last move reference when the drag operation ends
       lastMoveRef.current = null
+      lastHoverTimeRef.current = 0
       return { dropped: true }
     },
-    collect: (monitor) => ({
+    collect: (monitor: DropTargetMonitor) => ({
       isOver: monitor.isOver(),
+      dropResult: monitor.getDropResult(),
+      canDrop: monitor.canDrop(),
+      isOverCurrent: monitor.isOver({ shallow: false }),
+      isOverCurrentShallow: monitor.isOver({ shallow: true }),
+      item: monitor.getItem(),
+      itemType: monitor.getItemType(),
+      isOverTarget: monitor.isOver({ shallow: false }),
+      isOverTargetShallow: monitor.isOver({ shallow: true }),
+      handlerId: monitor.getHandlerId(),
+      receiveHandlerId: monitor.receiveHandlerId,
     }),
   })
 

@@ -35,7 +35,7 @@ const DropZone = ({
       }
     },
     collect: (monitor) => ({
-      isOver: monitor.isOver({ shallow: false }),
+      isOver: monitor.isOver({ shallow: true }),
     }),
   })
 
