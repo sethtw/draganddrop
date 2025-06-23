@@ -17,9 +17,17 @@ const GroupManager = ({
   transferItem,
   containerStyle = {}
 }: GroupManagerProps) => {
+  // Create a consistent moveCard function for each group
+  const createMoveCardForGroup = (groupId: string) => {
+    return (dragIndex: number, hoverIndex: number) => {
+      moveItemInGroup(groupId, dragIndex, hoverIndex)
+    }
+  }
+
   // Render individual item or group based on item count
   const renderGroupOrItem = (group: Group) => {
     const items = groupItems[group.id] || []
+    const moveCard = createMoveCardForGroup(group.id)
     
     // If group has only one item, render the item directly
     if (items.length === 1) {
@@ -29,7 +37,7 @@ const GroupManager = ({
           key={item.id}
           item={item}
           index={0}
-          moveCard={(dragIndex, hoverIndex) => moveItemInGroup(group.id, dragIndex, hoverIndex)}
+          moveCard={moveCard}
           groupId={group.id}
           transferItem={transferItem}
           isSingleItemGroup={true}
@@ -44,7 +52,7 @@ const GroupManager = ({
         groupId={group.id}
         title={group.title}
         items={items}
-        moveCard={(dragIndex, hoverIndex) => moveItemInGroup(group.id, dragIndex, hoverIndex)}
+        moveCard={moveCard}
         transferItem={transferItem}
         backgroundColor={group.backgroundColor}
       />
